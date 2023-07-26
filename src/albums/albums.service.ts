@@ -1,15 +1,26 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  forwardRef,
+  Inject,
+} from '@nestjs/common';
 import { ResponseMessages } from 'src/common/enums/response-messages.enum';
 import { v4 as uuidv4 } from 'uuid';
 import { IAlbum } from './interface/album.interface';
 import { AlbumDto } from './dto/album.dto';
 import { TracksService } from 'src/tracks/tracks.service';
+import { FavoritesService } from 'src/favorites/favorites.service';
 
 @Injectable()
 export class AlbumsService {
   private albums: IAlbum[];
 
-  constructor(private tracksService: TracksService) {
+  constructor(
+    @Inject(forwardRef(() => TracksService))
+    private readonly tracksService: TracksService,
+    @Inject(forwardRef(() => FavoritesService))
+    private readonly favoritesService: FavoritesService,
+  ) {
     this.albums = [];
   }
 
@@ -52,6 +63,9 @@ export class AlbumsService {
 
     this.albums.splice(albumIndex, 1);
     this.tracksService.setNullAlbumId(id);
+
+    const fav = await this.favoritesService.getAlbum(id);
+    fav && this.favoritesService.deleteAlbum(id);
   }
 
   async setNullArtistId(id: string) {
