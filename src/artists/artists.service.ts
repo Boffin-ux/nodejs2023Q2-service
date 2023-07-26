@@ -3,12 +3,13 @@ import { ResponseMessages } from 'src/common/enums/response-messages.enum';
 import { v4 as uuidv4 } from 'uuid';
 import { IArtist } from './interface/artist.interface';
 import { ArtistDto } from './dto/artist.dto';
+import { AlbumsService } from 'src/albums/albums.service';
 
 @Injectable()
 export class ArtistsService {
   private artists: IArtist[];
 
-  constructor() {
+  constructor(private albumsService: AlbumsService) {
     this.artists = [];
   }
 
@@ -50,5 +51,7 @@ export class ArtistsService {
     }
 
     this.artists.splice(artistIndex, 1);
+    this.albumsService.setNullArtistId(id);
+    console.log('this.albumsService: ', this.albumsService.getAllAlbums());
   }
 }
