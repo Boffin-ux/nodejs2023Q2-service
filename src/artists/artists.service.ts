@@ -4,12 +4,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { IArtist } from './interface/artist.interface';
 import { ArtistDto } from './dto/artist.dto';
 import { AlbumsService } from 'src/albums/albums.service';
+import { TracksService } from 'src/tracks/tracks.service';
 
 @Injectable()
 export class ArtistsService {
   private artists: IArtist[];
 
-  constructor(private albumsService: AlbumsService) {
+  constructor(
+    private albumsService: AlbumsService,
+    private tracksService: TracksService,
+  ) {
     this.artists = [];
   }
 
@@ -52,6 +56,6 @@ export class ArtistsService {
 
     this.artists.splice(artistIndex, 1);
     this.albumsService.setNullArtistId(id);
-    console.log('this.albumsService: ', this.albumsService.getAllAlbums());
+    this.tracksService.setNullArtistId(id);
   }
 }
