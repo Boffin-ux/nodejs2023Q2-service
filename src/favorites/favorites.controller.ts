@@ -3,6 +3,7 @@ import { Delete, Param, Post, HttpCode } from '@nestjs/common/decorators';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -21,7 +22,7 @@ export class FavoritesController {
   @ApiOkResponse({ description: 'Successful operation' })
   @Get('')
   async getAll() {
-    return await this.favoritesService.getFavorites();
+    return await this.favoritesService.getAllFavorites();
   }
 
   @ApiOperation({ summary: 'Add track to the favorites' })
@@ -34,7 +35,7 @@ export class FavoritesController {
   }
 
   @ApiOperation({ summary: 'Delete track from favorites' })
-  @ApiCreatedResponse({ description: 'Deleted successfully' })
+  @ApiNoContentResponse({ description: 'Deleted successfully' })
   @ApiBadRequestResponse({ description: ResponseMessages.BAD_REQUEST })
   @ApiUnprocessableEntityResponse({ description: ResponseMessages.NOT_FOUND })
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -53,7 +54,7 @@ export class FavoritesController {
   }
 
   @ApiOperation({ summary: 'Delete artist from favorites' })
-  @ApiCreatedResponse({ description: 'Deleted successfully' })
+  @ApiNoContentResponse({ description: 'Deleted successfully' })
   @ApiBadRequestResponse({ description: ResponseMessages.BAD_REQUEST })
   @ApiUnprocessableEntityResponse({ description: ResponseMessages.NOT_FOUND })
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -72,7 +73,7 @@ export class FavoritesController {
   }
 
   @ApiOperation({ summary: 'Delete album from favorites' })
-  @ApiCreatedResponse({ description: 'Deleted successfully' })
+  @ApiNoContentResponse({ description: 'Deleted successfully' })
   @ApiBadRequestResponse({ description: ResponseMessages.BAD_REQUEST })
   @ApiUnprocessableEntityResponse({ description: ResponseMessages.NOT_FOUND })
   @HttpCode(HttpStatus.NO_CONTENT)

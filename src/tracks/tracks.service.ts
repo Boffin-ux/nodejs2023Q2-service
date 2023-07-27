@@ -1,84 +1,28 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  forwardRef,
-} from '@nestjs/common';
-import { ResponseMessages } from 'src/common/enums/response-messages.enum';
-import { v4 as uuidv4 } from 'uuid';
-import { ITrack } from './interface/track.interface';
+import { Injectable } from '@nestjs/common';
 import { TrackDto } from './dto/track.dto';
-import { FavoritesService } from 'src/favorites/favorites.service';
+import { Database } from 'src/db/database.provider';
 
 @Injectable()
 export class TracksService {
-  private tracks: ITrack[];
-
-  constructor(
-    @Inject(forwardRef(() => FavoritesService))
-    private favoritesService: FavoritesService,
-  ) {
-    this.tracks = [];
-  }
+  constructor(private db: Database) {}
 
   async getAllTracks() {
-    return this.tracks;
+    return await this.db.tracks.getAllTracks();
   }
 
   async addTrack(dto: TrackDto) {
-    const track = {
-      id: uuidv4(),
-      ...dto,
-    };
-    this.tracks = [...this.tracks, track];
-
-    return track;
+    return await this.db.tracks.addTrack(dto);
   }
 
   async getTrackById(id: string) {
-    return this.tracks.find((track) => track.id === id);
+    return this.db.tracks.getTrackById(id);
   }
 
   async updateTrack(id: string, dto: TrackDto) {
-    let track = this.tracks.find((track) => track.id === id);
-
-    if (!track) {
-      throw new NotFoundException(ResponseMessages.NOT_FOUND);
-    }
-
-    track = { ...track, ...dto };
-
-    return track;
+    return await this.db.tracks.updateTrack(id, dto);
   }
 
   async deleteTrack(id: string) {
-    const trackIndex = this.tracks.findIndex((track) => track.id === id);
-
-    if (trackIndex === -1) {
-      throw new NotFoundException(ResponseMessages.NOT_FOUND);
-    }
-
-    this.tracks.splice(trackIndex, 1);
-
-    const fav = await this.favoritesService.getTrack(id);
-    fav && this.favoritesService.deleteTrack(id);
-  }
-
-  async setNullArtistId(id: string) {
-    this.tracks = this.tracks.map((track) => {
-      if (track.artistId === id) {
-        track.artistId = null;
-      }
-      return track;
-    });
-  }
-
-  async setNullAlbumId(id: string) {
-    this.tracks = this.tracks.map((track) => {
-      if (track.albumId === id) {
-        track.albumId = null;
-      }
-      return track;
-    });
+    await this.db.removeTrack(id);
   }
 }
