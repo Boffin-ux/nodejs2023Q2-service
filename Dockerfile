@@ -1,13 +1,25 @@
-FROM node:18-alpine
+FROM node:18-alpine AS builder
 
-EXPOSE ${PORT}
-
-WORKDIR /usr/app
-
-COPY . .
+WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+COPY prisma ./prisma/
 
-CMD ["npm", "run", "start:dev"]
+RUN npm ci && npm cache clean --force
+
+COPY . .
+
+RUN npm run build
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app .
+
+EXPOSE ${PORT}
+
+RUN npx prisma generate
+
+CMD ["npm", "run", "start:migrate"]
