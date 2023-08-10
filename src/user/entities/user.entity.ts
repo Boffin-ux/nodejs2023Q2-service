@@ -4,13 +4,18 @@ export class UserEntity {
   id: string;
   login: string;
   version: number;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: Date;
+  updatedAt: Date;
 
   @Exclude()
   password: string;
 
   constructor(partial: Partial<UserEntity>) {
-    Object.assign(this, partial);
+    const source = partial && {
+      ...partial,
+      createdAt: partial.createdAt?.getTime(),
+      updatedAt: partial.updatedAt?.getTime(),
+    };
+    Object.assign(this, source);
   }
 }

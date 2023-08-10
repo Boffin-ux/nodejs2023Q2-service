@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { UserDatabase } from './users.db';
 import { ArtistsDatabase } from './artists.db';
 import { TracksDatabase } from './tracks.db';
 import { AlbumsDatabase } from './albums.db';
@@ -12,14 +11,12 @@ type Entries<T> = {
 
 @Injectable()
 export class Database {
-  users: UserDatabase;
   artists: ArtistsDatabase;
   tracks: TracksDatabase;
   albums: AlbumsDatabase;
   favorites: FavoritesDatabase;
 
   constructor() {
-    this.users = new UserDatabase();
     this.artists = new ArtistsDatabase();
     this.tracks = new TracksDatabase();
     this.albums = new AlbumsDatabase();

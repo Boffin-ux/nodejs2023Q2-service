@@ -1,29 +1,57 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UpdatePasswordDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Database } from 'src/db/database.provider';
+import { PrismaService } from 'src/prisma.service';
+import { ResponseMessages } from 'src/common/enums/response-messages.enum';
 
 @Injectable()
 export class UsersService {
-  constructor(private db: Database) {}
+  constructor(private prisma: PrismaService) {}
 
   async getAllUsers() {
-    return this.db.users.getAllUsers();
+    return await this.prisma.user.findMany();
   }
 
   async createUser(dto: CreateUserDto) {
-    return await this.db.users.createUser(dto);
+    return await this.prisma.user.create({ data: dto });
   }
 
   async getUserById(id: string) {
-    return await this.db.users.getUserById(id);
+    return await this.prisma.user.findUnique({ where: { id } });
   }
 
   async deleteUser(id: string) {
-    await this.db.users.deleteUser(id);
+    try {
+      await this.prisma.user.delete({ where: { id } });
+    } catch (err) {
+      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+    }
   }
 
-  async updateUser(id: string, dto: UpdatePasswordDto) {
-    return await this.db.users.updateUser(id, dto);
+  async updateUser(
+    id: string,
+    { oldPassword, newPassword }: UpdatePasswordDto,
+  ) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+    }
+
+    if (user.password !== oldPassword) {
+      throw new ForbiddenException(ResponseMessages.WRONG_PASSWORD);
+    }
+
+    return await this.prisma.user.update({
+      where: { id },
+      data: {
+        password: newPassword,
+        version: { increment: 1 },
+      },
+    });
   }
 }
