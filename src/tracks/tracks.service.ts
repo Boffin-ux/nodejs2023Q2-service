@@ -1,28 +1,42 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { TrackDto } from './dto/track.dto';
-import { Database } from 'src/db/database.provider';
+import { PrismaService } from 'src/prisma.service';
+import { ResponseMessages } from 'src/common/enums/response-messages.enum';
 
 @Injectable()
 export class TracksService {
-  constructor(private db: Database) {}
+  constructor(private prisma: PrismaService) {}
 
   async getAllTracks() {
-    return await this.db.tracks.getAllTracks();
+    return await this.prisma.track.findMany();
   }
 
   async addTrack(dto: TrackDto) {
-    return await this.db.tracks.addTrack(dto);
+    return await this.prisma.track.create({ data: dto });
   }
 
   async getTrackById(id: string) {
-    return this.db.tracks.getTrackById(id);
+    return this.prisma.track.findUnique({ where: { id } });
   }
 
   async updateTrack(id: string, dto: TrackDto) {
-    return await this.db.tracks.updateTrack(id, dto);
+    const track = await this.prisma.track.findUnique({ where: { id } });
+
+    if (!track) {
+      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+    }
+
+    return await this.prisma.track.update({
+      where: { id },
+      data: dto,
+    });
   }
 
   async deleteTrack(id: string) {
-    await this.db.removeTrack(id);
+    try {
+      await this.prisma.track.delete({ where: { id } });
+    } catch (err) {
+      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+    }
   }
 }
