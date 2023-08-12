@@ -1,21 +1,20 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 
 export class UserEntity {
   id: string;
   login: string;
   version: number;
+
+  @Transform(({ value }) => value.getTime())
   createdAt: Date;
+
+  @Transform(({ value }) => value.getTime())
   updatedAt: Date;
 
   @Exclude()
   password: string;
 
   constructor(partial: Partial<UserEntity>) {
-    const source = partial && {
-      ...partial,
-      createdAt: partial.createdAt?.getTime(),
-      updatedAt: partial.updatedAt?.getTime(),
-    };
-    Object.assign(this, source);
+    Object.assign(this, partial);
   }
 }

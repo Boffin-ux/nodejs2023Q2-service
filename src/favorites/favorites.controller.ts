@@ -1,5 +1,16 @@
-import { Controller, Get, HttpStatus } from '@nestjs/common';
-import { Delete, Param, Post, HttpCode } from '@nestjs/common/decorators';
+import {
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  Delete,
+  Param,
+  Post,
+  HttpCode,
+  UseInterceptors,
+} from '@nestjs/common/decorators';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -12,9 +23,13 @@ import {
 import { FavoritesService } from './favorites.service';
 import { ResponseMessages } from 'src/common/enums/response-messages.enum';
 import { ValidateId } from 'src/common/validations/validate-id.pipe';
+import { ArtistEntity } from 'src/artists/entities/artist.entity';
+import { AlbumEntity } from 'src/albums/entities/album.entity';
+import { TrackEntity } from 'src/tracks/entities/track.entity';
 
 @ApiTags('Favorites')
 @Controller('favs')
+@UseInterceptors(ClassSerializerInterceptor)
 export class FavoritesController {
   constructor(private favoritesService: FavoritesService) {}
 
@@ -22,7 +37,13 @@ export class FavoritesController {
   @ApiOkResponse({ description: 'Successful operation' })
   @Get('')
   async getAll() {
-    return await this.favoritesService.getAllFavorites();
+    const { artists, albums, tracks } =
+      await this.favoritesService.getAllFavorites();
+    return {
+      artists: artists.map((artist) => new ArtistEntity(artist)),
+      albums: albums.map((album) => new AlbumEntity(album)),
+      tracks: tracks.map((track) => new TrackEntity(track)),
+    };
   }
 
   @ApiOperation({ summary: 'Add track to the favorites' })

@@ -1,72 +1,93 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ResponseMessages } from 'src/common/enums/response-messages.enum';
-import { Database } from 'src/db/database.provider';
+import { PrismaService } from 'src/prisma.service';
+import { TrackEntity } from 'src/favorites/entities/track.entity';
+import { AlbumEntity } from 'src/favorites/entities/album.entity';
+import { ArtistEntity } from 'src/artists/entities/artist.entity';
 
 @Injectable()
 export class FavoritesService {
-  constructor(private db: Database) {}
+  constructor(private prisma: PrismaService) {}
 
   async getAllFavorites() {
-    return await this.db.getAllFavorites();
+    const [artists, albums, tracks] = await Promise.all([
+      this.prisma.artist.findMany({ where: { NOT: [{ favoriteId: null }] } }),
+      this.prisma.album.findMany({ where: { NOT: [{ favoriteId: null }] } }),
+      this.prisma.track.findMany({ where: { NOT: [{ favoriteId: null }] } }),
+    ]);
+
+    return { artists, albums, tracks };
   }
 
   async addTrack(id: string) {
-    const track = this.db.tracks.getTrackById(id);
-
-    if (!track) {
+    try {
+      await this.prisma.track.update({
+        where: { id },
+        data: {
+          favoriteId: (await this.prisma.favorites.create({ data: {} })).id,
+        },
+      });
+    } catch (err) {
       throw new UnprocessableEntityException(ResponseMessages.NOT_FOUND);
     }
-
-    this.db.favorites.addTrack(id);
   }
 
   async deleteTrack(id: string) {
-    const track = this.db.favorites.getTrack(id);
-
-    if (!track) {
+    try {
+      await this.prisma.track.update({
+        where: { id },
+        data: { favoriteId: null },
+      });
+    } catch (err) {
       throw new UnprocessableEntityException(ResponseMessages.NOT_FOUND);
     }
-
-    this.db.favorites.deleteTrack(id);
   }
 
   async addArtist(id: string) {
-    const artist = this.db.artists.getArtistById(id);
-
-    if (!artist) {
+    try {
+      await this.prisma.artist.update({
+        where: { id },
+        data: {
+          favoriteId: (await this.prisma.favorites.create({ data: {} })).id,
+        },
+      });
+    } catch (err) {
       throw new UnprocessableEntityException(ResponseMessages.NOT_FOUND);
     }
-
-    this.db.favorites.addArtist(id);
   }
 
   async deleteArtist(id: string) {
-    const artist = this.db.favorites.getArtist(id);
-
-    if (!artist) {
+    try {
+      await this.prisma.artist.update({
+        where: { id },
+        data: { favoriteId: null },
+      });
+    } catch (err) {
       throw new UnprocessableEntityException(ResponseMessages.NOT_FOUND);
     }
-
-    this.db.favorites.deleteArtist(id);
   }
 
   async addAlbum(id: string) {
-    const album = this.db.albums.getAlbumById(id);
-
-    if (!album) {
+    try {
+      await this.prisma.album.update({
+        where: { id },
+        data: {
+          favoriteId: (await this.prisma.favorites.create({ data: {} })).id,
+        },
+      });
+    } catch (err) {
       throw new UnprocessableEntityException(ResponseMessages.NOT_FOUND);
     }
-
-    this.db.favorites.addAlbum(id);
   }
 
   async deleteAlbum(id: string) {
-    const album = this.db.favorites.getAlbum(id);
-
-    if (!album) {
+    try {
+      await this.prisma.album.update({
+        where: { id },
+        data: { favoriteId: null },
+      });
+    } catch (err) {
       throw new UnprocessableEntityException(ResponseMessages.NOT_FOUND);
     }
-
-    this.db.favorites.deleteAlbum(id);
   }
 }
