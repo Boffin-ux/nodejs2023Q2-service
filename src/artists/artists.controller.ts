@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpStatus,
@@ -27,9 +28,11 @@ import { ResponseMessages } from 'src/common/enums/response-messages.enum';
 import { NotFoundInterceptor } from 'src/common/interceptors/notFound.interceptor';
 import { ArtistsService } from './artists.service';
 import { ArtistDto } from './dto/artist.dto';
+import { ArtistEntity } from './entities/artist.entity';
 
 @ApiTags('Artists')
 @Controller('artist')
+@UseInterceptors(ClassSerializerInterceptor)
 export class ArtistsController {
   constructor(private artistsService: ArtistsService) {}
 
@@ -37,7 +40,8 @@ export class ArtistsController {
   @ApiOkResponse({ description: 'Successful operation' })
   @Get('')
   async getAll() {
-    return await this.artistsService.getAllArtists();
+    const artists = await this.artistsService.getAllArtists();
+    return artists.map((artist) => new ArtistEntity(artist));
   }
 
   @ApiOperation({ summary: 'Add new artist' })
@@ -48,7 +52,8 @@ export class ArtistsController {
     @Body(new ValidationPipe({ validateCustomDecorators: true }))
     artistDto: ArtistDto,
   ) {
-    return await this.artistsService.addArtist(artistDto);
+    const artist = await this.artistsService.addArtist(artistDto);
+    return new ArtistEntity(artist);
   }
 
   @ApiOperation({ summary: 'Get Artist By Id' })
@@ -58,7 +63,8 @@ export class ArtistsController {
   @UseInterceptors(new NotFoundInterceptor('Artist'))
   @Get(':artistId')
   async getArtist(@Param('artistId', ValidateId) id: string) {
-    return await this.artistsService.getArtistById(id);
+    const artist = await this.artistsService.getArtistById(id);
+    return new ArtistEntity(artist);
   }
 
   @ApiOperation({ summary: 'Update Artist by ID' })
@@ -71,7 +77,8 @@ export class ArtistsController {
     artistDto: ArtistDto,
     @Param('artistId', ValidateId) id: string,
   ) {
-    return await this.artistsService.updateArtist(id, artistDto);
+    const artist = await this.artistsService.updateArtist(id, artistDto);
+    return new ArtistEntity(artist);
   }
 
   @ApiOperation({ summary: 'Delete Artist by ID' })

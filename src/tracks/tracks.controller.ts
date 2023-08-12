@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpStatus,
@@ -16,6 +17,7 @@ import {
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -27,9 +29,11 @@ import { ResponseMessages } from 'src/common/enums/response-messages.enum';
 import { NotFoundInterceptor } from 'src/common/interceptors/notFound.interceptor';
 import { TrackDto } from './dto/track.dto';
 import { TracksService } from './tracks.service';
+import { TrackEntity } from './entities/track.entity';
 
 @ApiTags('Tracks')
 @Controller('track')
+@UseInterceptors(ClassSerializerInterceptor)
 export class TracksController {
   constructor(private tracksService: TracksService) {}
 
@@ -37,18 +41,23 @@ export class TracksController {
   @ApiOkResponse({ description: 'Successful operation' })
   @Get('')
   async getAll() {
-    return await this.tracksService.getAllTracks();
+    const tracks = await this.tracksService.getAllTracks();
+    return tracks.map((track) => new TrackEntity(track));
   }
 
   @ApiOperation({ summary: 'Add new track' })
   @ApiCreatedResponse({ description: 'New track is created' })
   @ApiBadRequestResponse({ description: ResponseMessages.BAD_REQUEST })
+  @ApiInternalServerErrorResponse({
+    description: ResponseMessages.SERVER_ERROR,
+  })
   @Post('')
   async create(
     @Body(new ValidationPipe({ validateCustomDecorators: true }))
     trackDto: TrackDto,
   ) {
-    return await this.tracksService.addTrack(trackDto);
+    const track = await this.tracksService.addTrack(trackDto);
+    return new TrackEntity(track);
   }
 
   @ApiOperation({ summary: 'Get single track by id' })
@@ -58,20 +67,25 @@ export class TracksController {
   @UseInterceptors(new NotFoundInterceptor('Track'))
   @Get(':trackId')
   async getAlbum(@Param('trackId', ValidateId) id: string) {
-    return await this.tracksService.getTrackById(id);
+    const track = await this.tracksService.getTrackById(id);
+    return new TrackEntity(track);
   }
 
   @ApiOperation({ summary: 'Update track information by ID' })
   @ApiOkResponse({ description: 'Track updated' })
   @ApiNotFoundResponse({ description: `Track ${ResponseMessages.NOT_FOUND}` })
   @ApiBadRequestResponse({ description: ResponseMessages.BAD_REQUEST })
+  @ApiInternalServerErrorResponse({
+    description: ResponseMessages.SERVER_ERROR,
+  })
   @Put(':trackId')
   async update(
     @Body(new ValidationPipe({ validateCustomDecorators: true }))
     trackDto: TrackDto,
     @Param('trackId', ValidateId) id: string,
   ) {
-    return await this.tracksService.updateTrack(id, trackDto);
+    const track = await this.tracksService.updateTrack(id, trackDto);
+    return new TrackEntity(track);
   }
 
   @ApiOperation({ summary: 'Delete Track by ID' })

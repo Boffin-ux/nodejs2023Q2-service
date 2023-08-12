@@ -1,9 +1,6 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ResponseMessages } from 'src/common/enums/response-messages.enum';
 import { PrismaService } from 'src/prisma.service';
-import { TrackEntity } from 'src/favorites/entities/track.entity';
-import { AlbumEntity } from 'src/favorites/entities/album.entity';
-import { ArtistEntity } from 'src/artists/entities/artist.entity';
 
 @Injectable()
 export class FavoritesService {
