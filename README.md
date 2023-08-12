@@ -24,6 +24,11 @@ npm install
 ```
 npm start
 ```
+or start application in development/watch mode in docker container
+
+```
+npm run docker:up
+```
 
 Before starting the application you can create .env (see .env.example) file and set your preferred port (4000 as default) for the server.
 
@@ -45,6 +50,13 @@ To run only one of all test suites
 ```
 npm run test -- <path to suite>
 ```
+## Docker Scan for vulnerabilities
+To scan docker image vulnerability execute:
+
+```
+npm run docker:scout
+```
+
 
 ### Auto-fix and format
 
