@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  backend:
+    depends_on:
+      - postgres
+    image: app-hls
+    container_name: backend
+    build: .
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - nestjs
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    build: ./database
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    command: postgres -c logging_collector=on -c log_destination=stderr -c log_directory=/logs
+    healthcheck:
+      test: [ "CMD", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./logs:/logs
+    networks:
+      - nestjs
+volumes:
+  pgdata:
+networks:
+  nestjs:
+    driver: bridge

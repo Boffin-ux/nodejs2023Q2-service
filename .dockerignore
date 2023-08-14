@@ -1,0 +1,16 @@
+# output
+**node_modules
+dist
+**Dockerfile
+database
+.git*
+docker-compose.yml
+README.md
+node.code-workspace
+doc
+.vscode
+.env.example
+
+# Logs
+logs
+*.log
