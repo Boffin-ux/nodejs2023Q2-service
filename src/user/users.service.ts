@@ -1,12 +1,6 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { UpdatePasswordDto } from './dto/update-user.dto';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma.service';
-import { ResponseMessages } from 'src/common/enums/response-messages.enum';
 
 @Injectable()
 export class UsersService {
@@ -24,34 +18,26 @@ export class UsersService {
     return await this.prisma.user.findUnique({ where: { id } });
   }
 
-  async deleteUser(id: string) {
+  async updateUser(id: string, newPassword: string) {
     try {
-      await this.prisma.user.delete({ where: { id } });
-    } catch (err) {
-      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+      return await this.prisma.user.update({
+        where: { id },
+        data: {
+          password: newPassword,
+          version: { increment: 1 },
+        },
+      });
+    } catch {
+      return null;
     }
   }
 
-  async updateUser(
-    id: string,
-    { oldPassword, newPassword }: UpdatePasswordDto,
-  ) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-
-    if (!user) {
-      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+  async deleteUser(id: string) {
+    try {
+      await this.prisma.user.delete({ where: { id } });
+      return true;
+    } catch {
+      return false;
     }
-
-    if (user.password !== oldPassword) {
-      throw new ForbiddenException(ResponseMessages.WRONG_PASSWORD);
-    }
-
-    return await this.prisma.user.update({
-      where: { id },
-      data: {
-        password: newPassword,
-        version: { increment: 1 },
-      },
-    });
   }
 }

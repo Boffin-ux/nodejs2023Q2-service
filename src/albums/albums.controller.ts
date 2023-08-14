@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  NotFoundException,
   ValidationPipe,
 } from '@nestjs/common';
 import {
@@ -78,6 +79,7 @@ export class AlbumsController {
   @ApiInternalServerErrorResponse({
     description: ResponseMessages.SERVER_ERROR,
   })
+  @UseInterceptors(new NotFoundInterceptor('Album'))
   @Put(':albumId')
   async update(
     @Body(new ValidationPipe({ validateCustomDecorators: true }))
@@ -95,6 +97,12 @@ export class AlbumsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':albumId')
   async remove(@Param('albumId', ValidateId) id: string) {
-    return await this.albumsService.deleteAlbum(id);
+    const album = await this.albumsService.deleteAlbum(id);
+
+    if (!album) {
+      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+    }
+
+    return album;
   }
 }

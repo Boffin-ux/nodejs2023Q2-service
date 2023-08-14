@@ -1,7 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AlbumDto } from './dto/album.dto';
 import { PrismaService } from 'src/prisma.service';
-import { ResponseMessages } from 'src/common/enums/response-messages.enum';
 
 @Injectable()
 export class AlbumsService {
@@ -20,23 +19,22 @@ export class AlbumsService {
   }
 
   async updateAlbum(id: string, dto: AlbumDto) {
-    const album = await this.prisma.album.findUnique({ where: { id } });
-
-    if (!album) {
-      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+    try {
+      return await this.prisma.album.update({
+        where: { id },
+        data: dto,
+      });
+    } catch {
+      return null;
     }
-
-    return await this.prisma.album.update({
-      where: { id },
-      data: dto,
-    });
   }
 
   async deleteAlbum(id: string) {
     try {
       await this.prisma.album.delete({ where: { id } });
-    } catch (err) {
-      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+      return true;
+    } catch {
+      return false;
     }
   }
 }

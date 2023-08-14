@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  NotFoundException,
   ValidationPipe,
 } from '@nestjs/common';
 import {
@@ -71,6 +72,7 @@ export class ArtistsController {
   @ApiOkResponse({ description: 'Artist updated' })
   @ApiNotFoundResponse({ description: `Artist ${ResponseMessages.NOT_FOUND}` })
   @ApiBadRequestResponse({ description: ResponseMessages.BAD_REQUEST })
+  @UseInterceptors(new NotFoundInterceptor('Artist'))
   @Put(':artistId')
   async update(
     @Body(new ValidationPipe({ validateCustomDecorators: true }))
@@ -88,6 +90,12 @@ export class ArtistsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':artistId')
   async remove(@Param('artistId', ValidateId) id: string) {
-    return await this.artistsService.deleteArtist(id);
+    const artist = await this.artistsService.deleteArtist(id);
+
+    if (!artist) {
+      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+    }
+
+    return artist;
   }
 }

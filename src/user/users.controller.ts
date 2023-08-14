@@ -2,8 +2,10 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  ForbiddenException,
   Get,
   HttpStatus,
+  NotFoundException,
   ValidationPipe,
 } from '@nestjs/common';
 import {
@@ -74,13 +76,20 @@ export class UsersController {
   @ApiNotFoundResponse({ description: `User ${ResponseMessages.NOT_FOUND}` })
   @ApiBadRequestResponse({ description: ResponseMessages.BAD_REQUEST })
   @ApiForbiddenResponse({ description: ResponseMessages.WRONG_PASSWORD })
+  @UseInterceptors(new NotFoundInterceptor('User'))
   @Put(':userId')
   async update(
     @Body(new ValidationPipe({ validateCustomDecorators: true }))
-    userDto: UpdatePasswordDto,
+    { oldPassword, newPassword }: UpdatePasswordDto,
     @Param('userId', ValidateId) id: string,
   ) {
-    const updateUser = await this.usersService.updateUser(id, userDto);
+    const user = await this.usersService.getUserById(id);
+
+    if (user && user.password !== oldPassword) {
+      throw new ForbiddenException(ResponseMessages.WRONG_PASSWORD);
+    }
+
+    const updateUser = await this.usersService.updateUser(id, newPassword);
     return new UserEntity(updateUser);
   }
 
@@ -91,6 +100,12 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':userId')
   async remove(@Param('userId', ValidateId) id: string) {
-    return await this.usersService.deleteUser(id);
+    const user = await this.usersService.deleteUser(id);
+
+    if (!user) {
+      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+    }
+
+    return user;
   }
 }

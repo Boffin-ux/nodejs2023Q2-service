@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  NotFoundException,
   ValidationPipe,
 } from '@nestjs/common';
 import {
@@ -78,6 +79,7 @@ export class TracksController {
   @ApiInternalServerErrorResponse({
     description: ResponseMessages.SERVER_ERROR,
   })
+  @UseInterceptors(new NotFoundInterceptor('Track'))
   @Put(':trackId')
   async update(
     @Body(new ValidationPipe({ validateCustomDecorators: true }))
@@ -95,6 +97,10 @@ export class TracksController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':trackId')
   async remove(@Param('trackId', ValidateId) id: string) {
-    return await this.tracksService.deleteTrack(id);
+    const track = await this.tracksService.deleteTrack(id);
+    if (!track) {
+      throw new NotFoundException(ResponseMessages.NOT_FOUND);
+    }
+    return track;
   }
 }
