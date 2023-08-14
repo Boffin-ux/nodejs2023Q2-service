@@ -30,6 +30,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    command: postgres -c logging_collector=on -c log_destination=stderr -c log_directory=/logs
     healthcheck:
       test: [ "CMD", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
@@ -37,12 +38,11 @@ services:
       retries: 5
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - pglogs:/var/log/postgresql
+      - ./logs:/logs
     networks:
       - nestjs
 volumes:
   pgdata:
-  pglogs:
 networks:
   nestjs:
     driver: bridge
