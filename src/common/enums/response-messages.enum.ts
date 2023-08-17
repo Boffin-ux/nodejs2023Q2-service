@@ -7,6 +7,7 @@ enum ResponseMessages {
   FORBIDDEN = 'Access Denied',
   SERVER_ERROR = 'Internal error',
   WRONG_PASSWORD = 'Wrong password',
+  INCORRECT_AUTH_DATA = 'Incorrect login or password',
 }
 
 export { ResponseMessages };

@@ -4,6 +4,7 @@ export class UserEntity {
   id: string;
   login: string;
   version: number;
+  refreshToken: string;
 
   @Transform(({ value }) => value.getTime())
   createdAt: Date;
