@@ -31,10 +31,12 @@ import { NotFoundInterceptor } from 'src/common/interceptors/notFound.intercepto
 import { AlbumsService } from './albums.service';
 import { AlbumDto } from './dto/album.dto';
 import { AlbumEntity } from './entities/album.entity';
+import { Auth } from '@src/common/decorators/auth.decorator';
 
 @ApiTags('Albums')
 @Controller('album')
 @UseInterceptors(ClassSerializerInterceptor)
+@Auth()
 export class AlbumsController {
   constructor(private albumsService: AlbumsService) {}
 

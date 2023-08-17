@@ -28,15 +28,18 @@ import {
 } from '@nestjs/swagger/dist';
 import { UsersService } from './users.service';
 import { UpdatePasswordDto } from './dto/update-user.dto';
-import { ValidateId } from 'src/common/validations/validate-id.pipe';
 import { UserEntity } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { ResponseMessages } from 'src/common/enums/response-messages.enum';
-import { NotFoundInterceptor } from 'src/common/interceptors/notFound.interceptor';
+import { Auth } from '@src/common/decorators/auth.decorator';
+import { ResponseMessages } from '@src/common/enums/response-messages.enum';
+import { NotFoundInterceptor } from '@src/common/interceptors/notFound.interceptor';
+import { ValidateId } from '@src/common/validations/validate-id.pipe';
+import { compareData } from '@src/common/utils/helpers';
 
 @ApiTags('Users')
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
+@Auth()
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
@@ -85,8 +88,12 @@ export class UsersController {
   ) {
     const user = await this.usersService.getUserById(id);
 
-    if (user && user.password !== oldPassword) {
-      throw new ForbiddenException(ResponseMessages.WRONG_PASSWORD);
+    if (user) {
+      const isPasswordsEqual = await compareData(oldPassword, user.password);
+
+      if (!isPasswordsEqual) {
+        throw new ForbiddenException(ResponseMessages.WRONG_PASSWORD);
+      }
     }
 
     const updateUser = await this.usersService.updateUser(id, newPassword);

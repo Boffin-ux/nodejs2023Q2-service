@@ -32,11 +32,13 @@ export class UsersService {
   }
 
   async updateUser(id: string, newPassword: string) {
+    const hash = await hashData(newPassword);
+
     try {
       return await this.prisma.user.update({
         where: { id },
         data: {
-          password: newPassword,
+          password: hash,
           version: { increment: 1 },
         },
       });

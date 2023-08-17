@@ -80,9 +80,7 @@ export class AuthService {
   }
 
   async signUp(authDto: AuthUserDto) {
-    const user = await this.usersService.createUser(authDto);
-
-    return await this.getTokens(user);
+    return await this.usersService.createUser(authDto);
   }
 
   async logout(userId: string) {

@@ -28,10 +28,12 @@ import { ArtistEntity } from 'src/artists/entities/artist.entity';
 import { AlbumEntity } from 'src/albums/entities/album.entity';
 import { TrackEntity } from 'src/tracks/entities/track.entity';
 import { UnEntityInterceptor } from './interceptors/unEntity.interceptor';
+import { Auth } from '@src/common/decorators/auth.decorator';
 
 @ApiTags('Favorites')
 @Controller('favs')
 @UseInterceptors(ClassSerializerInterceptor)
+@Auth()
 export class FavoritesController {
   constructor(private favoritesService: FavoritesService) {}
 

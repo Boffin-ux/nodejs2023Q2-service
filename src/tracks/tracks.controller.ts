@@ -31,10 +31,12 @@ import { NotFoundInterceptor } from 'src/common/interceptors/notFound.intercepto
 import { TrackDto } from './dto/track.dto';
 import { TracksService } from './tracks.service';
 import { TrackEntity } from './entities/track.entity';
+import { Auth } from '@src/common/decorators/auth.decorator';
 
 @ApiTags('Tracks')
 @Controller('track')
 @UseInterceptors(ClassSerializerInterceptor)
+@Auth()
 export class TracksController {
   constructor(private tracksService: TracksService) {}
 

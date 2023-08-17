@@ -30,10 +30,12 @@ import { NotFoundInterceptor } from 'src/common/interceptors/notFound.intercepto
 import { ArtistsService } from './artists.service';
 import { ArtistDto } from './dto/artist.dto';
 import { ArtistEntity } from './entities/artist.entity';
+import { Auth } from '@src/common/decorators/auth.decorator';
 
 @ApiTags('Artists')
 @Controller('artist')
 @UseInterceptors(ClassSerializerInterceptor)
+@Auth()
 export class ArtistsController {
   constructor(private artistsService: ArtistsService) {}
 
