@@ -36,6 +36,15 @@ async function bootstrap() {
   app.useLogger(logger);
   app.useLogger(LOGGER_LEVEL);
 
+  process.on('unhandledRejection', (err) => {
+    logger.error(`Unhandled Rejection ${err}`);
+  });
+
+  process.on('uncaughtException', (err) => {
+    logger.error(`Uncaught Exception ${err.name} ${err.message}`);
+    process.exit(1);
+  });
+
   await app.listen(PORT);
 
   logger.debug(`Application is running on port: ${PORT}`, 'StartApp');
