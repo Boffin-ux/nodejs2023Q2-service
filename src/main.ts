@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger/dist';
 import { LoggingService } from './logger/logger.service';
 import { LogLevels } from './logger/enums/logger.enum';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { HttpAdapterHost } from '@nestjs/core';
 
 const PORT = process.env.PORT || 4000;
 const SWAGGER_API_ENDPOINT = '/api/docs';
@@ -36,17 +38,20 @@ async function bootstrap() {
   app.useLogger(logger);
   app.useLogger(LOGGER_LEVEL);
 
-  process.on('unhandledRejection', (err) => {
-    logger.error(`Unhandled Rejection ${err}`);
+  const httpAdapterHost = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new AllExceptionsFilter(logger, httpAdapterHost));
+
+  process.on('unhandledRejection', async (err) => {
+    await logger.error(`Unhandled Rejection ${err}`);
   });
 
-  process.on('uncaughtException', (err) => {
-    logger.error(`Uncaught Exception ${err.name} ${err.message}`);
+  process.on('uncaughtException', async (err) => {
+    await logger.error(`Uncaught Exception ${err.name} ${err.message}`);
     process.exit(1);
   });
 
   await app.listen(PORT);
 
-  logger.debug(`Application is running on port: ${PORT}`, 'StartApp');
+  await logger.debug(`Application is running on port: ${PORT}`, bootstrap.name);
 }
 bootstrap();
