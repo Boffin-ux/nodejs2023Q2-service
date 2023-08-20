@@ -6,6 +6,7 @@ import { AlbumsModule } from './albums/albums.module';
 import { TracksModule } from './tracks/tracks.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { AuthModule } from './auth/auth.module';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthModule } from './auth/auth.module';
     AlbumsModule,
     TracksModule,
     FavoritesModule,
+    LoggerModule,
   ],
 })
 export class AppModule {}
