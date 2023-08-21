@@ -9,13 +9,13 @@ import { HttpAdapterHost } from '@nestjs/core';
 import { LoggingService } from '@src/logger/logger.service';
 
 @Catch()
-export class AllExceptionsFilter implements ExceptionFilter {
+export class AllExceptionsFilter<T> implements ExceptionFilter {
   constructor(
     private readonly logger: LoggingService,
     private readonly httpAdapterHost: HttpAdapterHost,
   ) {}
 
-  async catch(exception: unknown, host: ArgumentsHost) {
+  async catch(exception: T, host: ArgumentsHost) {
     const { httpAdapter } = this.httpAdapterHost;
     const ctx = host.switchToHttp();
     const { url, method } = ctx.getRequest();
@@ -25,7 +25,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message = isHttpException && exception.message;
+    const message = isHttpException
+      ? exception['response']['message']
+      : String(exception);
+
     const name = isHttpException && exception.name;
     const responseBody = {
       statusCode,
@@ -34,7 +37,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
       path: url,
     };
 
-    await this.logger.error(`${method} ${url} ${statusCode} ${message}`, name);
+    await this.logger.error(
+      `Rout: {${url}, ${method}}, Status Code: [${statusCode}], Message: '${message}'`,
+      name,
+    );
 
     httpAdapter.reply(ctx.getResponse(), responseBody, statusCode);
   }
