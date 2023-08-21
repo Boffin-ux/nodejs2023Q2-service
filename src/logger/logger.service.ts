@@ -3,7 +3,7 @@ import { LogLevels } from './enums/logger.enum';
 import { writeFile, stat, rename, mkdir } from 'fs/promises';
 import { resolve, parse } from 'path';
 
-const fileSize = +process.env.MAX_LOG_FILE_SIZE || 1;
+const fileSize = +process.env.MAX_LOG_FILE_SIZE || 100;
 const kib = 1024;
 
 @Injectable()
@@ -27,36 +27,50 @@ export class LoggingService extends ConsoleLogger {
   async log(message: string, context = '') {
     super.log(message, context);
 
-    const msg = this.modifiedMessage(message, LogLevels.LOG, context);
-    await this.writeLog(msg, this.fileLogs);
+    if (this.isLevelEnabled('log')) {
+      const msg = this.modifiedMessage(message, LogLevels.LOG, context);
+      await this.writeLog(msg, this.fileLogs);
+    }
   }
 
   async error(message: string, stackOrContext = '') {
     super.error(message, stackOrContext);
 
-    const msg = this.modifiedMessage(message, LogLevels.ERROR, stackOrContext);
-    await this.writeLog(msg, this.fileErrLogs);
+    if (this.isLevelEnabled(LogLevels.ERROR)) {
+      const msg = this.modifiedMessage(
+        message,
+        LogLevels.ERROR,
+        stackOrContext,
+      );
+      await this.writeLog(msg, this.fileErrLogs);
+    }
   }
 
   async warn(message: string, context = '') {
     super.warn(message, context);
 
-    const msg = this.modifiedMessage(message, LogLevels.WARN, context);
-    await this.writeLog(msg, this.fileLogs);
+    if (this.isLevelEnabled(LogLevels.WARN)) {
+      const msg = this.modifiedMessage(message, LogLevels.WARN, context);
+      await this.writeLog(msg, this.fileLogs);
+    }
   }
 
   async debug(message: string, context = '') {
     super.debug(message, context);
 
-    const msg = this.modifiedMessage(message, LogLevels.DEBUG, context);
-    await this.writeLog(msg, this.fileLogs);
+    if (this.isLevelEnabled(LogLevels.DEBUG)) {
+      const msg = this.modifiedMessage(message, LogLevels.DEBUG, context);
+      await this.writeLog(msg, this.fileLogs);
+    }
   }
 
   async verbose(message: string, context = '') {
     super.verbose(message, context);
 
-    const msg = this.modifiedMessage(message, LogLevels.VERBOSE, context);
-    await this.writeLog(msg, this.fileLogs);
+    if (this.isLevelEnabled(LogLevels.VERBOSE)) {
+      const msg = this.modifiedMessage(message, LogLevels.VERBOSE, context);
+      await this.writeLog(msg, this.fileLogs);
+    }
   }
 
   private async writeLog(msg: string, fileName: string) {
