@@ -34,6 +34,14 @@ Before starting the application you can create .env (see .env.example) file and 
 
 After starting the app you can open in your browser OpenAPI documentation by http://localhost:4000/api/docs.
 
+## Authentication and Authorization
+User can login with personal login & password, server returns response with Access token and Refresh token
+
+To use the POST auth/refresh route you must pass a refreshToken in the authorization header in format "Bearer refreshToken"
+
+```
+Bearer <refreshToken>
+```
 
 ## Testing
 
@@ -50,6 +58,19 @@ To run only one of all test suites
 ```
 npm run test -- <path to suite>
 ```
+
+To run all test with authorization
+
+```
+npm run test:auth
+```
+
+To run only specific test suite with authorization
+
+```
+npm run test:auth -- <path to suite>
+```
+
 ## Docker Scan for vulnerabilities
 To scan docker image vulnerability execute:
 
