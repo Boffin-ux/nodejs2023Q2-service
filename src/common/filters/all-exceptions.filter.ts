@@ -38,7 +38,7 @@ export class AllExceptionsFilter<T> implements ExceptionFilter {
     };
 
     await this.logger.error(
-      `Rout: {${url}, ${method}}, Status Code: [${statusCode}], Message: '${message}'`,
+      `Route: {${url}, ${method}}, Status Code: [${statusCode}], Message: '${message}'`,
       name,
     );
 
