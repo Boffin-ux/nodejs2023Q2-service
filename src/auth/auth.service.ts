@@ -22,15 +22,15 @@ export class AuthService {
       this.jwtService.signAsync(
         { userId, login },
         {
-          secret: String(process.env.JWT_SECRET_KEY),
-          expiresIn: String(process.env.TOKEN_EXPIRE_TIME),
+          secret: process.env.JWT_SECRET_KEY,
+          expiresIn: process.env.TOKEN_EXPIRE_TIME,
         },
       ),
       this.jwtService.signAsync(
         { userId, login },
         {
-          secret: String(process.env.JWT_REFRESH_SECRET_KEY),
-          expiresIn: String(process.env.TOKEN_REFRESH_EXPIRE_TIME),
+          secret: process.env.JWT_SECRET_REFRESH_KEY,
+          expiresIn: process.env.TOKEN_REFRESH_EXPIRE_TIME,
         },
       ),
     ]);
